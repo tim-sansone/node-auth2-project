@@ -29,13 +29,12 @@ const restricted = (req, res, next) => {
       next({status: 401, message: 'Token invalid'})
       return
     }
+    console.log(decoded)
     req.jwt = decoded
     next()
   })
 }
-
-const only = role_name => (req, res, next) => {
-  /*
+/*
     If the user does not provide a token in the Authorization header with a role_name
     inside its payload matching the role_name passed to this function as its argument:
     status 403
@@ -45,6 +44,12 @@ const only = role_name => (req, res, next) => {
 
     Pull the decoded token from the req object, to avoid verifying it again!
   */
+const only = role_name => (req, res, next) => {
+  if(req.jwt.role_name !== role_name){
+    next({status: 403, message: 'This is not for you'})
+    return
+  }
+  next()
 }
 
 
