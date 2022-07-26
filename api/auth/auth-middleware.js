@@ -1,8 +1,8 @@
 const Users = require('../users/users-model')
 const { JWT_SECRET } = require("../secrets"); // use this secret!
+const jwt = require('jsonwebtoken')
 
-const restricted = (req, res, next) => {
-  /*
+/*
     If the user does not provide a token in the Authorization header:
     status 401
     {
@@ -17,6 +17,21 @@ const restricted = (req, res, next) => {
 
     Put the decoded token in the req object, to make life easier for middlewares downstream!
   */
+
+const restricted = (req, res, next) => {
+  const token = req.headers.authorization;
+  if(token == null){
+    next({status: 401, message: 'Token required'})
+    return
+  }
+  jwt.verify(token, JWT_SECRET, (err, decoded) => {
+    if(err){
+      next({status: 401, message: 'Token invalid'})
+      return
+    }
+    req.jwt = decoded
+    next()
+  })
 }
 
 const only = role_name => (req, res, next) => {
